@@ -1,0 +1,6 @@
+version: 0.0
+Resources:
+  - get-sentiment:
+      Type: AWS::Lambda::Function
+      Properties:
+        Name: "get-sentiment"

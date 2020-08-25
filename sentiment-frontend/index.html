@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width">
+
+    <title>Twitter Sentiment Analysis</title>
+    <link rel="icon" href="logo.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
+
+    <style>
+        body{
+            padding: 0;
+            margin: 0;
+            background: #ffffff;
+        }
+        button{
+            background: #008CBA;
+            color: white;
+            padding-left: 20px;
+            padding-right: 20px;
+            border-radius: 6px;
+        }
+        input{
+            border: 10;
+            padding-left: 4px;
+            padding-right: 4px;
+            border-radius: 12px;
+        }
+        #header{
+            background-color: #4288ef;
+            margin: 0;
+            padding: 0;
+        }
+        
+        #header img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            height: 100px;
+        }
+
+        #input-area{
+            overflow: hidden;
+            background-color: #4288ef;
+            margin: 0;
+            padding: 0;
+            left:50%;
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        #input-area h1 {
+            color: white;
+            font-weight:normal;
+            font-family: "Lucida Console", Courier, monospace;
+        }
+        #loading{
+            margin-top: 60px;
+            text-align: center;
+            font-weight:normal;
+            font-family: "Lucida Console", Courier, monospace;
+        }
+        #note{
+            display: block;
+            text-align: center;
+            font-weight:normal;
+            font-size: 100%;
+            font-family: "Lucida Console", Courier, monospace;
+        }
+        .loader {
+          display: inline-block;
+          border: 16px solid #f3f3f3; /* Light grey */
+          border-top: 16px solid #3498db; /* Blue */
+          border-radius: 50%;
+          width: 120px;
+          height: 120px;
+          animation: spin 2s linear infinite;
+        }
+        .chart-container{
+            position: relative;
+            height:50%;
+            width:50%;
+            float:left;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        @media(max-width: 768px){
+            .chart-container{
+                position: relative;
+                height:100%;
+                width:100%;
+                float:left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <img src="logo.png">
+    </div>
+
+    <div id="input-area">
+        <h1>Enter up to 3 terms to compare</h1>
+        <input type="text" id="query" name="query"><br><br>
+        <input type="text" id="query2" name="query1"><br><br>
+        <input type="text" id="query3" name="query2"><br><br>
+        <button onclick="fillData()">Get Sentiment</button>
+    </div>
+
+    <div id="loading">
+        <div class="loader"></div>
+        <h1>Fetching up to 1500 latest tweets per term...</h1>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="line-canvas"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="bar-canvas"></canvas>
+    </div>
+    <h1 id="note">Note: The sentiment values range from -1 to +1</h1>
+
+    <script>
+    var colors = ['red','green','blue'];
+    var ctx = document.getElementById('line-canvas').getContext('2d');
+    var cty = document.getElementById('bar-canvas').getContext('2d');
+    
+    note = document.getElementById("note");
+    note.style.display = "none";
+    loading = document.getElementById("loading");
+    loading.style.display = "none";
+
+    var lineChart = null;
+    var barChart = null;
+    function getLineDatasets(values, queries){
+        datasets = []
+        for (i in values){
+            datasets.push({
+                label: queries[i],
+                data: values[i],
+                pointRadius: 0,
+                fill: false,
+                borderColor: colors[i],
+                borderWidth: 3
+            })
+        }
+        return datasets
+    }
+
+    function getAverage(data){
+        sum = 0;
+        count = 0;
+        for (i in data){
+            sum += data[i].y;
+            count++;
+        }
+       return [sum/count]
+    }
+
+    function getBarDatasets(values, queries){
+        datasets = [];
+        for (i in values){
+            datasets.push({
+                label: queries[i],
+                backgroundColor: colors[i],
+                maxBarThickness: 40,
+                data: getAverage(values[i])
+            })
+        }
+        return datasets;
+    }
+
+    function createLineChart(datasets){
+        lineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: datasets
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            min: -1,
+                            max: 1
+                        }
+                        
+                    }],
+                    xAxes: [{
+                        type: 'time',
+                        ticks: {
+                            display: false //this will remove only the label
+                        }
+                    }]
+                },
+                title: {
+                    display: true,
+                    text: 'Sentiment Over Time (Recent Tweets)'
+                }
+            }
+        });
+    }
+
+    function createBarChart(datasets){
+        console.log('creating bar chart')
+        if (barChart != null){
+            barChart.destroy()
+        }
+        barChart = new Chart(cty, {
+            type: 'bar',
+            data: {
+                labels: ['Average Sentiment'],
+                datasets: datasets
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            display: false
+                        }
+                    }]
+                },
+                title: {
+                    display: true,
+                    text: 'Average Sentiment'
+                }
+            }
+        });
+    }
+
+    function fillData(){
+        note.style.display = "none";
+        if (lineChart != null){
+            lineChart.destroy()
+        }
+        if (barChart != null){
+            barChart.destroy()
+        }
+        loading.style.display = "block";
+    	console.log('fillData started')
+        var responses = [];
+        queries = [document.getElementById("query").value,document.getElementById("query2").value, document.getElementById("query3").value]
+
+        for (var q = 2; q >= 0; q--){
+            if (queries[q] == ""){
+                queries.splice(q, 1);
+            }
+        }
+
+        for (q in queries){
+                responses.push(fetch('https://n831z3jc8h.execute-api.us-east-1.amazonaws.com/dev/get-sentiment?query=' + queries[q]).then(res => res.json()));
+        }
+
+        Promise.all(responses).then(values => {
+            console.log(values);
+            console.log(queries);
+            lineDatasets = getLineDatasets(values, queries);
+            loading.style.display = "none";
+            createLineChart(lineDatasets);
+            barDatasets = getBarDatasets(values, queries);
+            createBarChart(barDatasets);
+            note.style.display = "block";
+        });
+    }
+    
+    </script>
+</body>
+<html>

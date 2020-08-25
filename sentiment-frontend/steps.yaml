@@ -1,0 +1,50 @@
+options:
+ make smaller batch size
+ SUPPORT THIS SITE payment
+ add text placeholder like @imrankhan, sentence as well, etc
+ error if timeout or wrong symbol etc
+ add more useful print statements in lambda
+ add date as x axis if only single term
+ write avg sentiment on top of each bar
+ make responsive for mobail
+ return to dates instead of 1,2,3,?
+ ERASE DATE TOOLTIP
+ MENTION SOMEWHERE "GETTING LATEST 1000 TWEETS"
+ MAKE WEBSITE LOOK BETTER (HEADER, BAR CHART AVGS, BUTTON,TEXTFIELD,ADD WEEK OPTION)
+ FIX ROUTE53
+ ERROR HANDLING
+ ADD LOCATION
+ CHECK WHY 29 DATA POINTS AND NOT 30
+ ADD USEFUL PRINT STATEMENTS IN LAMBDA like query
+ ADD COMPARE OPTION FOR AT LEAST 3 
+ MAKE FUNCTIONS
+ CREATE BAR CHART FOR AVG
+ UPGRADE TWITTER API AND CHECK LIMIT
+ COMBINE USER AND APP LIMITS TO EXTEND LIMIT FURTHER?
+ CHECK IF MULTIPLE USERS CAN BE ADDED 
+ DECIDE WHETHER WAIT ON RATE LIMIT = TRUE OR NOT
+ CHECK IF TWEETS ARE PROPERLY BEING CLEANED
+ FIX DISAPPEARANCE OF GRAPH AFTER GO
+ ADD LOADING ICON
+ CHECK IF LESS DATES COME IF 3 CONCURRENT LAMBDA FUNCTIONS (because of twitter api rate limit)
+ ADD OPTION OF CHOOSING DAY FROM PAST 7 DAYS
+ MAYBE SHOW HISTORY BY CHOOSING FEW TWEETS EACH DAY FOR PAST DAYS (like 3 sec per day)
+ MAYBE ADD OPTION FOR TIME. OR JUST DISPLAY THAT ENGINE WILL SEARCH FOR TWEETS FOR 25 seconds
+ HAVE OPTION OF HOW MANY LAST TWEETS YOU WANT OR HOW MANY SECONDS YOU WANNA SEARCH
+ MAKE PIPELINE TO UPDATE LAMBDA WHEN COMMIT HQAPPNES
+ CHECK RATE LIMITs OF UPGRADE OPTIONS
+ TOTAL TWEETS FETCHEd. NO OF POINTS SHOWN THROUGH AVERAGED TWEETS
+ SHOW WHAT QUERY HAPPENED AS WELL
+ AVG POLARITY
+ make graph backwards live
+ stream tweets live with polarity
+ do a day day average graph
+ do just graph of one day
+ have clickable point to go to tweet
+ list of tweets below in text form
+
+ services, firewall, ami, rebalance needed?
+
+cmd:
+  powershell "Compress-Archive ./* output.zip"
+  aws lambda update-function-code --function-name  get-sentiment --zip-file fileb://output.zip
